@@ -9,6 +9,15 @@ const getFiles = async (PATH) => {
   }
 };
 
+const setFiles = async (PATH, obj) => {
+  try {
+    await fs.writeFile(PATH, JSON.stringify(obj));
+  } catch (e) {
+    console.log('erro na escrita de arquivo', e.message);
+  }
+};
+
 module.exports = {
   getFiles,
+  setFiles,
 };

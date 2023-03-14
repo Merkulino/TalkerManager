@@ -1,7 +1,11 @@
 const express = require('express');
 const crypto = require('crypto');
-const { getFiles } = require('./fsModule/fs');
-const { emailValidation, passwordValidation } = require('./validation/loginValidation');
+const { getFiles, setFiles } = require('./fsModule/fs');
+const { emailValidation, 
+        passwordValidation, 
+        tokenValidation,
+        talkerValidate,
+      } = require('./validation');
 
 const app = express();
 app.use(express.json());
@@ -42,9 +46,21 @@ app.post('/login',
   res.status(200).json({ token });
 });
 
-// app.post('/talker', (req, res) => {
-  // 5
-// });
+app.post('/talker', 
+  tokenValidation,
+  talkerValidate.nameField,
+  talkerValidate.ageFied,
+  talkerValidate.talkField,
+  talkerValidate.talkFieldRate,
+  async (req, res) => {
+    const obj = req.body;
+    const files = await getFiles(TALKER_PATH);
+    const newID = files.length + 1;
+    const newFile = [...files, { id: newID, ...obj }];
+    // console.log(newFile);
+    setFiles(TALKER_PATH, newFile);
+    return res.status(201).json({ id: newID, ...obj });
+});
 
 // app.put('/talker/:id', (req, res) => {
   // 6
