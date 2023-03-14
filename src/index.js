@@ -5,7 +5,7 @@ const { emailValidation,
         passwordValidation, 
         tokenValidation,
         talkerValidate,
-      } = require('./validation');
+      } = require('./validation/index');
 
 const app = express();
 app.use(express.json());
@@ -24,7 +24,7 @@ app.get('/', (_request, response) => {
 });
 
 app.get('/talker/search',
-  // tokenValidation,
+  tokenValidation,
   async (req, res) => {
   const { q: searchTerm } = req.query;
   console.log(searchTerm);
@@ -59,18 +59,19 @@ app.post('/login',
 });
 
 app.post('/talker', 
-  tokenValidation,
-  talkerValidate.nameField,
-  talkerValidate.ageFied,
-  talkerValidate.talkField,
-  talkerValidate.talkFieldRate,
+tokenValidation,
+talkerValidate.nameField,
+talkerValidate.ageFied,
+talkerValidate.talkField,
+talkerValidate.talkFieldRate,
+talkerValidate.talkFieldWatchedAt,
   async (req, res) => {
     const obj = req.body;
     const files = await getFiles(TALKER_PATH);
     const newID = files.length + 1;
     const newFile = [...files, { id: newID, ...obj }];
     // console.log(newFile);
-    setFiles(TALKER_PATH, newFile);
+    await setFiles(TALKER_PATH, newFile);
     return res.status(201).json({ id: newID, ...obj });
 });
 

@@ -18,24 +18,33 @@ const ageFied = (req, res, next) => {
 
 const talkField = (req, res, next) => {
   const { talk } = req.body;
-  const regexDate = /(^0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(\d{4}$)/;
   if (!talk) return res.status(400).json({ message: 'O campo "talk" é obrigatório' });
+  
+  console.log(talk);
+  next();
+};
+
+const talkFieldWatchedAt = (req, res, next) => {
+  const { talk } = req.body;
+  const regexDate = /(^0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(\d{4}$)/;
   if (!talk.watchedAt) {
     return res.status(400).json({ message: 'O campo "watchedAt" é obrigatório' });
   }
   if (!talk.watchedAt.match(regexDate)) {
    return res.status(400).json({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
   }
+  console.log(talk);
   next();
 };
 
 const talkFieldRate = (req, res, next) => {
   const { talk } = req.body;
-  console.log('rate', talk.rate);
+  console.log('rate', ([1, 2, 3, 4, 5].includes(talk.rate)
+  && talk.rate % 1 === 0), talk.rate);
   if (!talk.rate) return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
   if (
-    ![1, 2, 3, 4, 5].includes(talk.rate)
-    && talk.rate % 1 !== 0
+    !([1, 2, 3, 4, 5].includes(talk.rate)
+      && talk.rate % 1 === 0)
     ) {
    return res.status(400)
    .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
@@ -48,6 +57,7 @@ module.exports = {
     nameField,
     ageFied,
     talkField,
+    talkFieldWatchedAt,
     talkFieldRate,
   },
 };
