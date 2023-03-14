@@ -1,15 +1,69 @@
 const express = require('express');
+const { getFiles } = require('./fsModule/fs');
 
 const app = express();
 app.use(express.json());
 
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
+const TALKER_PATH = './src/talker.json';
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
+
+app.get('/talker', async (req, res) => {
+  const files = await getFiles(TALKER_PATH); 
+  if (files) return res.status(200).json(files);
+  return res.status(400).json({ message: 'Deu ruim' });
+});
+
+// app.('/talker/:id', (req, res) => {
+  // 2
+  // const { id } = req.params
+// });
+
+// app.post('/login', (req, res) => {
+  // 3
+// });
+
+// app.post('/talker', (req, res) => {
+  // 5
+// });
+
+// app.put('/talker/:id', (req, res) => {
+  // 6
+  // const { id } = req.params
+// });
+
+// app.delete('/talker/:id', (req, res) => {
+  // 7
+  // const { id } = req.params
+// });
+
+// app.get('/talker/search', (req, res) => {
+  // 8
+  // const { q } = req.query
+// });
+
+// app.get('/talker/search', (req, res) => {
+  // 9
+  // const { rate } = req.query
+// });
+
+// app.get('/talker/search', (req, res) => {
+  // 10
+  // const { date } = req.query
+// });
+
+// app.patch('/talker/rate/:id', (req, res) => {
+  // 11
+// });
+
+// app.get('/talker/db', (req, res) => {
+  // 12
+// });
 
 app.listen(PORT, () => {
   console.log('Online');
