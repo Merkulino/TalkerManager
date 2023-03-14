@@ -80,10 +80,13 @@ app.put('/talker/:id',
   res.status(200).json({ id, ...obj });
 });
 
-// app.delete('/talker/:id', (req, res) => {
-  // 7
-  // const { id } = req.params
-// });
+app.delete('/talker/:id', tokenValidation, async (req, res) => {
+  const { id } = req.params;
+  const files = await getFiles(TALKER_PATH);
+  const newFiles = files.filter((file) => file.id !== Number(id));
+  setFiles(newFiles);
+  res.status(204);
+});
 
 // app.get('/talker/search', (req, res) => {
   // 8
