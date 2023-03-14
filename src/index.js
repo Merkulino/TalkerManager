@@ -23,6 +23,18 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
+app.get('/talker/search',
+  // tokenValidation,
+  async (req, res) => {
+  const { q: searchTerm } = req.query;
+  console.log(searchTerm);
+  const files = await getFiles(TALKER_PATH);
+  if (!searchTerm && searchTerm === '') {
+    return res.status(200).json(files);
+  }
+  return res.status(200).json(files.filter(({ name }) => name.includes(searchTerm)));
+});
+
 app.get('/talker', async (req, res) => {
   const files = await getFiles(TALKER_PATH); 
   if (files) return res.status(200).json(files);
@@ -87,11 +99,6 @@ app.delete('/talker/:id', tokenValidation, async (req, res) => {
   setFiles(newFiles);
   res.status(204);
 });
-
-// app.get('/talker/search', (req, res) => {
-  // 8
-  // const { q } = req.query
-// });
 
 // app.get('/talker/search', (req, res) => {
   // 9
