@@ -62,10 +62,23 @@ app.post('/talker',
     return res.status(201).json({ id: newID, ...obj });
 });
 
-// app.put('/talker/:id', (req, res) => {
-  // 6
-  // const { id } = req.params
-// });
+app.put('/talker/:id', 
+  tokenValidation,
+  talkerValidate.nameField,
+  talkerValidate.ageFied,
+  talkerValidate.talkField,
+  talkerValidate.talkFieldRate,
+  async (req, res) => {
+  const { id } = req.params;
+  const obj = req.body;
+  const files = await getFiles(TALKER_PATH);
+  const newFiles = files.map((file) => {
+    if (file.id === Number(id)) return { ...obj };
+    return file;
+  });
+  setFiles(TALKER_PATH, newFiles);
+  res.status(200).json({ id, ...obj });
+});
 
 // app.delete('/talker/:id', (req, res) => {
   // 7
