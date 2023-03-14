@@ -1,6 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const { getFiles } = require('./fsModule/fs');
+const { emailValidation, passwordValidation } = require('./validation/loginValidation');
 
 const app = express();
 app.use(express.json());
@@ -32,7 +33,10 @@ app.get('/talker/:id', async (req, res) => {
   res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
 });
 
-app.post('/login', (req, res) => {
+app.post('/login',
+  emailValidation,
+  passwordValidation,
+  (req, res) => {
   // const { email, password } = req.body;
   const token = generateToken();
   res.status(200).json({ token });
