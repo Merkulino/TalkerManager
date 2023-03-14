@@ -19,10 +19,14 @@ app.get('/talker', async (req, res) => {
   return res.status(400).json({ message: 'Deu ruim' });
 });
 
-// app.('/talker/:id', (req, res) => {
-  // 2
-  // const { id } = req.params
-// });
+app.get('/talker/:id', async (req, res) => {
+  const { id } = req.params;
+  const files = await getFiles(TALKER_PATH);
+  const fileSelected = files.find((file) => file.id === Number(id));
+  console.log(fileSelected);
+  if (fileSelected) return res.status(200).json(fileSelected);
+  res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+});
 
 // app.post('/login', (req, res) => {
   // 3
