@@ -27,7 +27,6 @@ app.get('/talker/search',
   tokenValidation,
   async (req, res) => {
   const { q: searchTerm } = req.query;
-  console.log(searchTerm);
   const files = await getFiles(TALKER_PATH);
   if (!searchTerm && searchTerm === '') {
     return res.status(200).json(files);
@@ -58,41 +57,6 @@ app.post('/login',
   res.status(200).json({ token });
 });
 
-app.post('/talker', 
-tokenValidation,
-talkerValidate.nameField,
-talkerValidate.ageFied,
-talkerValidate.talkField,
-talkerValidate.talkFieldRate,
-talkerValidate.talkFieldWatchedAt,
-  async (req, res) => {
-    const obj = req.body;
-    const files = await getFiles(TALKER_PATH);
-    const newID = files.length + 1;
-    const newFile = [...files, { id: newID, ...obj }];
-    // console.log(newFile);
-    await setFiles(TALKER_PATH, newFile);
-    return res.status(201).json({ id: newID, ...obj });
-});
-
-app.put('/talker/:id', 
-  tokenValidation,
-  talkerValidate.nameField,
-  talkerValidate.ageFied,
-  talkerValidate.talkField,
-  talkerValidate.talkFieldRate,
-  async (req, res) => {
-  const { id } = req.params;
-  const obj = req.body;
-  const files = await getFiles(TALKER_PATH);
-  const newFiles = files.map((file) => {
-    if (file.id === Number(id)) return { ...obj };
-    return file;
-  });
-  setFiles(TALKER_PATH, newFiles);
-  res.status(200).json({ id, ...obj });
-});
-
 app.delete('/talker/:id', tokenValidation, async (req, res) => {
   const { id } = req.params;
   const files = await getFiles(TALKER_PATH);
@@ -118,6 +82,39 @@ app.delete('/talker/:id', tokenValidation, async (req, res) => {
 // app.get('/talker/db', (req, res) => {
   // 12
 // });
+
+app.use(tokenValidation);
+app.use(talkerValidate.nameField);
+app.use(talkerValidate.ageFied);
+app.use(talkerValidate.talkField);
+app.use(talkerValidate.talkFieldRate);
+app.use(talkerValidate.talkFieldWatchedAt);
+
+app.post('/talker', 
+  async (req, res) => {
+    const obj = req.body;
+    const files = await getFiles(TALKER_PATH);
+    const newID = files.length + 1;
+    const newFile = [...files, { id: newID, ...obj }];
+    await setFiles(TALKER_PATH, newFile);
+    return res.status(201).json({ id: newID, ...obj });
+});
+
+app.put('/talker/:id', 
+  async (req, res) => {
+  const { id } = req.params;
+  const targetID = Number(id);
+  const obj = req.body;
+  const files = await getFiles(TALKER_PATH);
+  const targetFile = files.find((file) => file.id === targetID);
+  if (!targetFile) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+  const newFiles = files.map((file) => {
+    if (file.id === targetID) return { id: targetID, ...obj };
+    return file;
+  });
+  await setFiles(TALKER_PATH, newFiles);
+  res.status(200).json({ id: targetID, ...obj });
+});
 
 app.listen(PORT, () => {
   console.log('Online');
