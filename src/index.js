@@ -51,7 +51,6 @@ app.get('/talker/:id', async (req, res) => {
 app.delete('/talker/:id', tokenValidation, async (req, res) => {
   const { id } = req.params;
   const files = await getFiles(TALKER_PATH);
-  // const fileSelected = files.find((file) => file.id === Number(id));
   if (!(files.find((file) => file.id === Number(id)))) {
     return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   } 
