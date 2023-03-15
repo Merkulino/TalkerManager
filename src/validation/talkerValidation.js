@@ -35,12 +35,12 @@ const talkFieldWatchedAt = (req, res, next) => {
 };
 
 const talkFieldRate = (req, res, next) => {
-  const { talk } = req.body;
-  if (!talk.rate && talk.rate !== 0) {
+  const { talk: { rate } } = req.body;
+  if (!rate && rate !== 0) {
     return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
   } 
   if (
-    !([1, 2, 3, 4, 5].includes(talk.rate))
+    !([1, 2, 3, 4, 5].includes(rate))
     ) {
    return res.status(400)
    .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });

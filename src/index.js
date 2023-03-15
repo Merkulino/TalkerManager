@@ -27,7 +27,7 @@ const filterQuerys = (q, rate, date, file) => {
   return queryFiltered;
 };
 
-const rateValidation = (req, res, next) => { // Repetindo código, refatorar Talvez não, porque as respostas são diferentes
+const rateValidation = (req, res, next) => { // Repetindo código, refatorar Esse sim
   const { rate } = req.query;
   if (rate && !([1, 2, 3, 4, 5].includes(Number(rate)))) {
     return res.status(400)
@@ -101,14 +101,36 @@ app.post('/login',
   res.status(200).json({ token });
 });
 
-// app.get('/talker/search', (req, res) => {
-  // 10
-  // const { date } = req.query
-// });
+function pathRateValidation(req, res, next) { // Repetição de código, refatorar. Não consigo simplesmente reutilizar a takerValidation por conta da req
+  const { rate } = req.body;
+  if (!rate && rate !== 0) {
+    return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
+  } 
+  if (
+    !([1, 2, 3, 4, 5].includes(rate))
+    ) {
+   return res.status(400)
+   .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+  }
+  next();
+}
 
-// app.patch('/talker/rate/:id', (req, res) => {
-  // 11
-// });
+app.patch('/talker/rate/:id', 
+  tokenValidation,
+  pathRateValidation,
+  async (req, res) => {
+    const { id } = req.params;
+    const { rate } = req.body;
+    const files = await getFiles(TALKER_PATH);
+    const targetI = files.findIndex((file) => file.id === Number(id));
+    if (targetI === -1) {
+      return res.status(404).json({ message: 'Pessoa palestrante não encontrada' }); 
+    }
+    files[targetI] = { ...files[targetI], talk: { ...files[targetI].talk, rate: Number(rate) } };
+
+    await setFiles(TALKER_PATH, files);
+    res.status(204).json(files[targetI]);
+});
 
 // app.get('/talker/db', (req, res) => {
   // 12
