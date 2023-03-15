@@ -1,11 +1,13 @@
 const express = require('express');
 const crypto = require('crypto');
+// db connection
+const connection = require('./db/connection');
 const { getFiles, setFiles } = require('./fsModule/fs');
 const { emailValidation, 
-        passwordValidation, 
-        tokenValidation,
-        talkerValidate,
-      } = require('./validation/index');
+  passwordValidation, 
+  tokenValidation,
+  talkerValidate,
+} = require('./validation/index');
 
 const app = express();
 app.use(express.json());
@@ -65,6 +67,17 @@ app.get('/talker/search',
   const querys = filterQuerys(search, rate, date, files);
   
   return res.status(200).json(querys);
+});
+
+app.get('/talker/db', async (req, res) => {
+  const [talkers] = await connection.execute('SELECT * FROM talkers');
+  const newTalkersList = talkers.map((talker) => ({ 
+    name: talker.name,
+    age: talker.age,
+    id: talker.id,
+    talk: { rate: talker.talk_rate, watchedAt: talker.talk_watched_at },
+   }));
+  res.status(200).json(newTalkersList);
 });
 
 app.get('/talker', async (req, res) => {
@@ -132,10 +145,6 @@ app.patch('/talker/rate/:id',
     res.status(204).json(files[targetI]);
 });
 
-// app.get('/talker/db', (req, res) => {
-  // 12
-// });
-
 app.use(tokenValidation);
 app.use(talkerValidate.nameField);
 app.use(talkerValidate.ageFied);
@@ -169,6 +178,8 @@ app.put('/talker/:id',
   res.status(200).json({ id: targetID, ...obj });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log('Online');
+  const [result] = await connection.execute('SELECT 1');
+  if (result) console.log('Database connected');
 });
