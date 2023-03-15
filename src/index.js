@@ -48,6 +48,14 @@ app.get('/talker/:id', async (req, res) => {
   res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
 });
 
+app.delete('/talker/:id', tokenValidation, async (req, res) => {
+  const { id } = req.params;
+  const files = await getFiles(TALKER_PATH);
+  const newFiles = files.filter((file) => file.id !== Number(id));
+  await setFiles(TALKER_PATH, newFiles);
+  res.status(204);
+});
+
 app.post('/login',
   emailValidation,
   passwordValidation,
@@ -55,14 +63,6 @@ app.post('/login',
   // const { email, password } = req.body;
   const token = generateToken();
   res.status(200).json({ token });
-});
-
-app.delete('/talker/:id', tokenValidation, async (req, res) => {
-  const { id } = req.params;
-  const files = await getFiles(TALKER_PATH);
-  const newFiles = files.filter((file) => file.id !== Number(id));
-  setFiles(newFiles);
-  res.status(204);
 });
 
 // app.get('/talker/search', (req, res) => {
