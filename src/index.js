@@ -18,6 +18,33 @@ function generateToken() {
   return crypto.randomBytes(8).toString('hex');
 }
 
+const filterQuerys = (q, rate, date, file) => {
+  let queryFiltered = file;
+  if (q) queryFiltered = queryFiltered.filter(({ name }) => name.includes(q));
+  if (rate) queryFiltered = queryFiltered.filter(({ talk }) => talk.rate === Number(rate));
+  if (date) queryFiltered = queryFiltered.filter(({ talk }) => talk.watchedAt === date); 
+  
+  return queryFiltered;
+};
+
+const rateValidation = (req, res, next) => { // Repetindo código, refatorar Talvez não, porque as respostas são diferentes
+  const { rate } = req.query;
+  if (rate && !([1, 2, 3, 4, 5].includes(Number(rate)))) {
+    return res.status(400)
+    .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+  }
+  next();
+};
+
+const dateValidation = (req, res, next) => { // Repetindo código, refatorar Talvez não, porque as respostas são diferentes
+  const { date } = req.query;
+  const regexDate = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/i;
+  if (date && !regexDate.test(date)) {
+    return res.status(400).json({ message: 'O parâmetro "date" deve ter o formato "dd/mm/aaaa"' });
+  }
+  next();
+};
+
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
@@ -25,13 +52,19 @@ app.get('/', (_request, response) => {
 
 app.get('/talker/search',
   tokenValidation,
+  rateValidation,
+  dateValidation,
   async (req, res) => {
-  const { q: searchTerm } = req.query;
+  const { q: search, rate, date } = req.query;
   const files = await getFiles(TALKER_PATH);
-  if (!searchTerm && searchTerm === '') {
+
+  if (!search && !rate && !date) {
     return res.status(200).json(files);
   }
-  return res.status(200).json(files.filter(({ name }) => name.includes(searchTerm)));
+
+  const querys = filterQuerys(search, rate, date, files);
+  
+  return res.status(200).json(querys);
 });
 
 app.get('/talker', async (req, res) => {
@@ -67,11 +100,6 @@ app.post('/login',
   const token = generateToken();
   res.status(200).json({ token });
 });
-
-// app.get('/talker/search', (req, res) => {
-  // 9
-  // const { rate } = req.query
-// });
 
 // app.get('/talker/search', (req, res) => {
   // 10
