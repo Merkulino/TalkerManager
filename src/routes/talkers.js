@@ -1,8 +1,10 @@
-const express = require('express')
+const express = require('express');
+
 const router = express.Router();
 const connection = require('../db/connection');
 const { getFiles, setFiles } = require('../fsModule/fs');
 const { tokenValidation, talkerValidate } = require('../validation');
+
 const TALKER_PATH = './src/talker.json';
 
 const filterQuerys = (q, rate, date, file) => {
@@ -14,42 +16,10 @@ const filterQuerys = (q, rate, date, file) => {
   return queryFiltered;
 };
 
-const rateValidation = (req, res, next) => { // Repetindo código, refatorar Esse sim
-  const { rate } = req.query;
-  if (rate && !([1, 2, 3, 4, 5].includes(Number(rate)))) {
-    return res.status(400)
-    .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
-  }
-  next();
-};
-
-const dateValidation = (req, res, next) => { // Repetindo código, refatorar Talvez não, porque as respostas são diferentes
-  const { date } = req.query;
-  const regexDate = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/i;
-  if (date && !regexDate.test(date)) {
-    return res.status(400).json({ message: 'O parâmetro "date" deve ter o formato "dd/mm/aaaa"' });
-  }
-  next();
-};
-
-function pathRateValidation(req, res, next) { // Repetição de código, refatorar. Não consigo simplesmente reutilizar a takerValidation por conta da req
-  const { rate } = req.body;
-  if (!rate && rate !== 0) {
-    return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
-  } 
-  if (
-    !([1, 2, 3, 4, 5].includes(rate))
-    ) {
-   return res.status(400)
-   .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
-  }
-  next();
-}
-
 router.get('/search',
   tokenValidation,
-  rateValidation,
-  dateValidation,
+  talkerValidate.rateValidation,
+  talkerValidate.dateValidation,
   async (req, res) => {
   const { q: search, rate, date } = req.query;
   const files = await getFiles(TALKER_PATH);
@@ -101,7 +71,7 @@ router.delete('/:id', tokenValidation, async (req, res) => {
 
 router.patch('/rate/:id', 
   tokenValidation,
-  pathRateValidation,
+  talkerValidate.pathRateValidation,
   async (req, res) => {
     const { id } = req.params;
     const { rate } = req.body;
